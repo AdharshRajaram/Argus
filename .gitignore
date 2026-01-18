@@ -27,6 +27,11 @@ Thumbs.db
 # Job search results (contain personal data)
 *_jobs.json
 jobs_*.json
+search_results/
+logs/
+
+# SQLite database
+*.db
 
 # Logs
 *.log

@@ -52,8 +52,8 @@ Categories available:
     parser.add_argument(
         "--categories", "-c",
         nargs="+",
-        choices=["ai_labs", "big_tech", "ai_startups"],
-        default=["ai_labs", "big_tech", "ai_startups"],
+        choices=["ai_labs", "big_tech", "ai_startups", "additional"],
+        default=["ai_labs", "big_tech", "ai_startups", "additional"],
         help="Company categories to search (default: all)",
     )
     parser.add_argument(

@@ -8,6 +8,8 @@ An AI-powered job search agent that crawls career pages, matches jobs against yo
 - **Universal Web Crawler**: Crawls any company career page without custom code per company
 - **Smart Matching**: Uses Claude AI to score and rank jobs based on your background and preferences
 - **Natural Language Preferences**: Describe your ideal job in plain English (e.g., "Senior MLE, Remote or Bay Area, focus on LLMs")
+- **Scheduled Searches**: Automated daily/weekly job searches with cron
+- **Deduplication**: SQLite-based tracking to only show new jobs
 - **Multiple Output Formats**: CLI table display and JSON export
 
 ## Installation
@@ -73,19 +75,76 @@ ai_startups:
 
 The universal crawler will automatically handle any career page.
 
+## Scheduled Searches
+
+Run automated job searches daily or weekly with deduplication (only shows new jobs).
+
+### Manual Scheduled Search
+
+```bash
+python scheduled_search.py \
+  --resume path/to/resume.pdf \
+  --query "machine learning" \
+  --categories ai_labs big_tech ai_startups \
+  --preferences "Senior MLE, Bay Area or Remote"
+```
+
+### View Statistics
+
+```bash
+# Show database statistics
+python scheduled_search.py --stats
+
+# Show new jobs from last 7 days
+python scheduled_search.py --recent --days 7
+```
+
+### Setup Automated Daily Search (Cron)
+
+1. Edit the `run_daily_search.sh` script with your paths and API key
+
+2. Make it executable:
+```bash
+chmod +x run_daily_search.sh
+```
+
+3. Add to crontab for daily searches at 9 AM:
+```bash
+crontab -e
+# Add this line:
+0 9 * * * /path/to/job-search-agent/run_daily_search.sh
+```
+
+For weekly searches (every Monday at 9 AM):
+```bash
+0 9 * * 1 /path/to/job-search-agent/run_daily_search.sh
+```
+
+### Results Storage
+
+- Results are saved to `search_results/search_YYYY-MM-DD_HHMMSS.json`
+- Seen jobs are tracked in `jobs.db` (SQLite)
+- Logs are saved to `logs/` directory
+
 ## Project Structure
 
 ```
 job-search-agent/
-├── search.py           # Main CLI entry point
-├── companies.yaml      # Target companies configuration
-├── generic_crawler.py  # Universal web crawler (Playwright)
-├── company_fetcher.py  # Orchestrates job fetching
-├── matcher.py          # Claude AI job matching
-├── resume_parser.py    # PDF resume parsing
-├── models.py           # Data models (Job, Resume, etc.)
-├── output.py           # CLI table and JSON output
-└── requirements.txt    # Python dependencies
+├── search.py            # Main CLI entry point
+├── scheduled_search.py  # Scheduled search with deduplication
+├── run_daily_search.sh  # Cron job script
+├── companies.yaml       # Target companies configuration
+├── generic_crawler.py   # Universal web crawler (Playwright)
+├── company_fetcher.py   # Orchestrates job fetching
+├── job_store.py         # SQLite job storage & deduplication
+├── matcher.py           # Claude AI job matching
+├── resume_parser.py     # PDF resume parsing
+├── models.py            # Data models (Job, Resume, etc.)
+├── output.py            # CLI table and JSON output
+├── requirements.txt     # Python dependencies
+├── search_results/      # Date-stamped search results (auto-created)
+├── logs/                # Search logs (auto-created)
+└── jobs.db              # SQLite database for deduplication (auto-created)
 ```
 
 ## Requirements
