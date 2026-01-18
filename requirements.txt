@@ -1,0 +1,7 @@
+anthropic
+pdfplumber
+playwright
+pyyaml
+requests
+rich
+pydantic
