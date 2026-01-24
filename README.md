@@ -1,157 +1,235 @@
 # Job Search Agent
 
-An AI-powered job search agent that crawls career pages, matches jobs against your resume, and ranks them based on your preferences.
+A Python-based job search agent that automatically crawls company career pages to find relevant ML/AI job listings. It supports multiple Applicant Tracking Systems (ATS) and provides flexible filtering options.
 
 ## Features
 
-- **Resume Parsing**: Extracts skills, experience, and job titles from your PDF resume using Claude AI
-- **Universal Web Crawler**: Crawls any company career page without custom code per company
-- **Smart Matching**: Uses Claude AI to score and rank jobs based on your background and preferences
-- **Natural Language Preferences**: Describe your ideal job in plain English (e.g., "Senior MLE, Remote or Bay Area, focus on LLMs")
-- **Scheduled Searches**: Automated daily/weekly job searches with cron
-- **Deduplication**: SQLite-based tracking to only show new jobs
-- **Multiple Output Formats**: CLI table display and JSON export
+- **Multi-ATS Support**: Automatically detects and crawls jobs from:
+  - Greenhouse
+  - Lever
+  - Ashby
+  - Workday
+  - Custom career pages (via Playwright)
+
+- **Smart Filtering**:
+  - Filter by job titles (with fuzzy matching)
+  - Filter by location (states, cities, remote)
+  - Exclude specific levels (staff, principal, lead, etc.)
+
+- **Auto-Detection**: Automatically detects ATS type from career URLs and finds direct API endpoints
+
+- **Incremental Results**: Saves results organized by date and company, avoiding duplicates
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/job-search-agent.git
+git clone https://github.com/mshen1019/job-search-agent.git
 cd job-search-agent
-
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Install Playwright browsers
-playwright install chromium
+# Install Playwright browsers (for custom ATS sites)
+python -m playwright install chromium
 ```
+
+## Quick Start
+
+```bash
+# Run with default configuration
+python run_search.py
+```
+
+This will:
+1. Load companies from `config/companies.yaml`
+2. Load job titles and filters from `config/titles.yaml`
+3. Crawl all companies and save matching jobs to `job_results/`
 
 ## Configuration
 
-Set your Anthropic API key:
+### Companies (`config/companies.yaml`)
 
-```bash
-export ANTHROPIC_API_KEY='your-api-key-here'
+Define the companies to crawl:
+
+```yaml
+companies:
+  - name: OpenAI
+    career_url: https://jobs.ashbyhq.com/openai
+    ats_type: ashby
+
+  - name: Anthropic
+    career_url: https://boards.greenhouse.io/anthropic
+    ats_type: greenhouse
+
+  - name: Mistral AI
+    career_url: https://jobs.lever.co/mistral
+    ats_type: lever
 ```
 
-## Usage
+**Supported ATS types:**
+- `greenhouse` - Greenhouse.io job boards
+- `lever` - Lever.co job boards
+- `ashby` - Ashby HQ job boards
+- `workday` - Workday job sites
+- `custom` - Custom career pages (uses Playwright)
 
-### Search Target Companies
+### Job Titles & Filters (`config/titles.yaml`)
+
+Configure target job titles, locations, and exclusions:
+
+```yaml
+titles:
+  - Machine Learning Engineer
+  - Senior Machine Learning Engineer
+  - Research Scientist
+  - Applied Scientist
+
+locations:
+  - California
+  - Remote
+
+# Exclude specific seniority levels
+exclude_levels:
+  - staff
+  - principal
+```
+
+**Available exclusion levels:**
+- `staff` - Staff-level positions
+- `principal` - Principal-level positions
+- `lead` - Lead roles
+- `director` - Director-level positions
+- `manager` - Manager roles
+- `head` - Head of department roles
+- `vp` - VP-level positions
+- `junior` - Junior/Associate positions
+
+## CLI Usage
+
+For more control, use the CLI directly:
 
 ```bash
 python search.py \
-  --resume path/to/your/resume.pdf \
-  --query "machine learning" \
-  --categories ai_labs big_tech ai_startups \
-  --preferences "Senior MLE level, Remote or Bay Area, focus on LLMs"
+  --companies config/companies.yaml \
+  --titles config/titles.yaml \
+  --output job_results \
+  --timeout 30
 ```
 
-### Options
+**Options:**
+- `-c, --companies` - Path to companies YAML file (required)
+- `-t, --titles` - Path to job titles YAML file (required)
+- `-o, --output` - Output directory for results (default: `job_results`)
+- `--timeout` - Request timeout in seconds (default: 30)
 
-| Option | Description |
-|--------|-------------|
-| `--resume` | Path to your PDF resume (required) |
-| `--query` | Job search keywords (required) |
-| `--categories` | Company categories: `ai_labs`, `big_tech`, `ai_startups` |
-| `--location` | Filter by location |
-| `--remote` | Only show remote jobs |
-| `--preferences` | Natural language job preferences |
-| `--limit` | Max jobs per company (default: 10) |
-| `--output` | Output JSON file path |
+## Output
 
-### Add New Companies
+Results are saved in a date-organized structure:
 
-Edit `companies.yaml` to add new target companies:
-
-```yaml
-ai_startups:
-  - name: New Company
-    careers_url: https://newcompany.com/careers
+```
+job_results/
+└── 2024-01-24/
+    ├── OpenAI/
+    │   └── jobs.json
+    ├── Anthropic/
+    │   └── jobs.json
+    └── ...
 ```
 
-The universal crawler will automatically handle any career page.
+Each `jobs.json` contains:
 
-## Scheduled Searches
+```json
+[
+  {
+    "company": "OpenAI",
+    "title": "Machine Learning Engineer",
+    "url": "https://jobs.ashbyhq.com/openai/abc123",
+    "location": "San Francisco, CA",
+    "team": "Applied AI",
+    "source": "ashby",
+    "discovered_at": "2024-01-24T10:30:00"
+  }
+]
+```
 
-Run automated job searches daily or weekly with deduplication (only shows new jobs).
+## Tools
 
-### Manual Scheduled Search
+### Fix ATS Configuration
+
+Automatically detect and fix incorrect ATS types and career URLs:
 
 ```bash
-python scheduled_search.py \
-  --resume path/to/resume.pdf \
-  --query "machine learning" \
-  --categories ai_labs big_tech ai_startups \
-  --preferences "Senior MLE, Bay Area or Remote"
+python fix_ats_config.py
 ```
 
-### View Statistics
+This will:
+1. Validate each company's career URL
+2. Auto-detect the correct ATS type
+3. Find direct ATS URLs when companies use embedded job boards
+4. Update `config/companies.yaml` with corrections
+
+### Investigate Unverified Companies
+
+For companies that couldn't be automatically verified:
 
 ```bash
-# Show database statistics
-python scheduled_search.py --stats
-
-# Show new jobs from last 7 days
-python scheduled_search.py --recent --days 7
+python investigate_unverified.py
 ```
-
-### Setup Automated Daily Search (Cron)
-
-1. Edit the `run_daily_search.sh` script with your paths and API key
-
-2. Make it executable:
-```bash
-chmod +x run_daily_search.sh
-```
-
-3. Add to crontab for daily searches at 9 AM:
-```bash
-crontab -e
-# Add this line:
-0 9 * * * /path/to/job-search-agent/run_daily_search.sh
-```
-
-For weekly searches (every Monday at 9 AM):
-```bash
-0 9 * * 1 /path/to/job-search-agent/run_daily_search.sh
-```
-
-### Results Storage
-
-- Results are saved to `search_results/search_YYYY-MM-DD_HHMMSS.json`
-- Seen jobs are tracked in `jobs.db` (SQLite)
-- Logs are saved to `logs/` directory
 
 ## Project Structure
 
 ```
 job-search-agent/
-├── search.py            # Main CLI entry point
-├── scheduled_search.py  # Scheduled search with deduplication
-├── run_daily_search.sh  # Cron job script
-├── companies.yaml       # Target companies configuration
-├── generic_crawler.py   # Universal web crawler (Playwright)
-├── company_fetcher.py   # Orchestrates job fetching
-├── job_store.py         # SQLite job storage & deduplication
-├── matcher.py           # Claude AI job matching
-├── resume_parser.py     # PDF resume parsing
-├── models.py            # Data models (Job, Resume, etc.)
-├── output.py            # CLI table and JSON output
-├── requirements.txt     # Python dependencies
-├── search_results/      # Date-stamped search results (auto-created)
-├── logs/                # Search logs (auto-created)
-└── jobs.db              # SQLite database for deduplication (auto-created)
+├── config/
+│   ├── companies.yaml      # Company list & career URLs
+│   └── titles.yaml         # Target job titles & filters
+├── job_search_agent/       # Main package
+│   ├── orchestrator.py     # Main orchestration logic
+│   ├── filter.py           # Job title/location filtering
+│   ├── store.py            # Job persistence
+│   ├── registry.py         # Company registry management
+│   ├── models.py           # Data models
+│   └── ats/                # ATS-specific adapters
+│       ├── greenhouse.py
+│       ├── lever.py
+│       ├── ashby.py
+│       ├── workday.py
+│       ├── generic.py      # Playwright-based fallback
+│       └── detector.py     # ATS auto-detection
+├── run_search.py           # Quick runner script
+├── search.py               # CLI entry point
+├── fix_ats_config.py       # ATS config fixer tool
+└── requirements.txt        # Dependencies
 ```
+
+## Adding New Companies
+
+1. Find the company's career page URL
+2. Add to `config/companies.yaml`:
+
+```yaml
+  - name: New Company
+    career_url: https://jobs.lever.co/newcompany
+    ats_type: lever
+```
+
+3. If unsure about ATS type, set to `unknown` and run `fix_ats_config.py`
+
+## Supported Companies
+
+The default configuration includes 50+ tech companies:
+- AI Labs: OpenAI, Anthropic, DeepMind, Mistral AI, Cohere, xAI, Perplexity AI
+- Big Tech: Google, Meta, Apple, Microsoft, Amazon
+- Finance: Stripe, Block, Coinbase, Plaid, Brex
+- And many more...
 
 ## Requirements
 
-- Python 3.11+
-- Anthropic API key (for Claude)
-- Playwright (for web crawling)
+- Python 3.9+
+- httpx
+- playwright
+- pyyaml
 
 ## License
 
