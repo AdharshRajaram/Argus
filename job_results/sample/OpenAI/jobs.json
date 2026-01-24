@@ -1,0 +1,29 @@
+[
+  {
+    "company": "OpenAI",
+    "title": "Machine Learning Engineer",
+    "url": "https://jobs.ashbyhq.com/openai/example-id-1",
+    "location": "San Francisco",
+    "team": "Applied AI",
+    "source": "ashby",
+    "discovered_at": "2024-01-24T10:00:00.000000"
+  },
+  {
+    "company": "OpenAI",
+    "title": "Research Scientist",
+    "url": "https://jobs.ashbyhq.com/openai/example-id-2",
+    "location": "San Francisco",
+    "team": "Research",
+    "source": "ashby",
+    "discovered_at": "2024-01-24T10:00:00.000000"
+  },
+  {
+    "company": "OpenAI",
+    "title": "Senior Machine Learning Engineer",
+    "url": "https://jobs.ashbyhq.com/openai/example-id-3",
+    "location": "Remote",
+    "team": "Platform",
+    "source": "ashby",
+    "discovered_at": "2024-01-24T10:00:00.000000"
+  }
+]

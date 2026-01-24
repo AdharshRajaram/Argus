@@ -1,7 +1,13 @@
-anthropic
-pdfplumber
-playwright
-pyyaml
-requests
-rich
-pydantic
+# Job Search Agent Dependencies
+
+# HTTP client
+httpx>=0.25.0
+
+# Browser automation for generic crawler
+playwright>=1.40.0
+
+# YAML parsing
+pyyaml>=6.0
+
+# Type hints (included in Python 3.9+)
+# typing-extensions>=4.0.0
