@@ -366,6 +366,12 @@ flows.
 The author does not operate any centralized crawling service and does not
 collect or store user data.
 
+## Contact
+
+For questions, suggestions, or issues, feel free to reach out:
+- Email: mshen1019@gmail.com
+- GitHub Issues: [https://github.com/mshen1019/Argus/issues](https://github.com/mshen1019/Argus/issues)
+
 ## License
 
 MIT
