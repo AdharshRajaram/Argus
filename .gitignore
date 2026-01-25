@@ -38,10 +38,13 @@ env/
 Thumbs.db
 
 # Project specific
-job_results/*
-!job_results/sample/
+job_results/
 companies_registry.json
 *.log
+
+# Personal profiles (keep default only in repo)
+config/profiles/Ming/
+config/profiles/Yaxi/
 
 # Claude Code
 .claude/
