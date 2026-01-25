@@ -2,13 +2,9 @@
 # The filter will match jobs containing these keywords
 
 titles:
-  - Machine Learning Engineer
-  - Senior Machine Learning Engineer
-  - Research Scientist
-  - Applied Scientist
-  - Senior Applied Scientist
-  - AI Scientist
-  - Senior AI Scientist
+  - Accounting Manager
+  - Senior Accounting Manager
+  - Manager, Accounting
 
 # Location requirements
 # Jobs must match at least one of these locations

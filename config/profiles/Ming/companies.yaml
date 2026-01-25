@@ -1,4 +1,4 @@
-# Company configuration for MLE / ML Scientist job search
+# Company configuration for Ming's profile
 # Alphabetically sorted by company name
 # Use direct ATS URLs for reliable job fetching
 
@@ -11,7 +11,7 @@ companies:
   ats_type: greenhouse
 - name: Amazon
   career_url: https://www.amazon.jobs
-  ats_type: custom
+  ats_type: amazon
 - name: Anthropic
   career_url: https://boards.greenhouse.io/anthropic
   ats_type: greenhouse
@@ -68,7 +68,7 @@ companies:
   ats_type: greenhouse
 - name: Google
   career_url: https://careers.google.com/jobs/results/
-  ats_type: custom
+  ats_type: google
 - name: Grab
   career_url: https://grab.careers
   ats_type: custom
@@ -91,8 +91,8 @@ companies:
   career_url: https://boards.greenhouse.io/lyft
   ats_type: greenhouse
 - name: Meta
-  career_url: https://www.metacareers.com/jobs
-  ats_type: custom
+  career_url: https://www.metacareers.com/jobsearch
+  ats_type: meta
 - name: Microsoft
   career_url: https://jobs.careers.microsoft.com/global/en/search
   ats_type: custom
@@ -142,23 +142,23 @@ companies:
   career_url: https://boards.greenhouse.io/stripe
   ats_type: greenhouse
 - name: TikTok
-  career_url: https://careers.tiktok.com
-  ats_type: custom
+  career_url: https://lifeattiktok.com/position
+  ats_type: tiktok
 - name: Two Sigma
   career_url: https://careers.twosigma.com
   ats_type: custom
 - name: Uber
-  career_url: https://www.uber.com/global/en/careers/list/
-  ats_type: custom
+  career_url: https://www.uber.com/us/en/careers/list/
+  ats_type: uber
 - name: Wayfair
   career_url: https://www.wayfair.com/careers
   ats_type: custom
+- name: xAI
+  career_url: https://job-boards.greenhouse.io/xai
+  ats_type: greenhouse
 - name: Yelp
   career_url: https://www.yelp.careers
   ats_type: custom
 - name: Zillow
   career_url: https://www.zillow.com/careers/
   ats_type: custom
-- name: xAI
-  career_url: https://boards.greenhouse.io/xai
-  ats_type: greenhouse

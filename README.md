@@ -1,6 +1,6 @@
-# Job Search Agent
+# Argus
 
-A Python-based job search agent that automatically crawls company career pages to find relevant ML/AI job listings. It supports multiple Applicant Tracking Systems (ATS) and provides flexible filtering options.
+A Python-based job search agent that automatically crawls company career pages to find relevant job listings. It supports multiple Applicant Tracking Systems (ATS), user profiles for different preferences, and provides flexible filtering options.
 
 ## Features
 
@@ -9,7 +9,16 @@ A Python-based job search agent that automatically crawls company career pages t
   - Lever
   - Ashby
   - Workday
+  - Amazon (custom API)
+  - Google (custom fetcher)
+  - TikTok (custom API)
+  - Uber (custom API)
   - Custom career pages (via Playwright)
+
+- **User Profiles**: Support for multiple users with different job preferences
+  - Each profile has its own titles, locations, and filters
+  - Results are stored separately per profile
+  - Optionally customize company lists per profile
 
 - **Smart Filtering**:
   - Filter by job titles (with fuzzy matching)
@@ -18,14 +27,18 @@ A Python-based job search agent that automatically crawls company career pages t
 
 - **Auto-Detection**: Automatically detects ATS type from career URLs and finds direct API endpoints
 
-- **Incremental Results**: Saves results organized by date and company, avoiding duplicates
+- **Incremental Results**: Saves results organized by date and company, avoiding duplicates across runs
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/mshen1019/job-search-agent.git
-cd job-search-agent
+git clone https://github.com/mshen1019/Argus.git
+cd Argus
+
+# (Optional) Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -37,14 +50,88 @@ python -m playwright install chromium
 ## Quick Start
 
 ```bash
-# Run with default configuration
+# Run with the default profile
 python run_search.py
+
+# Run with a specific profile
+python run_search.py alice
 ```
 
 This will:
-1. Load companies from `config/companies.yaml`
-2. Load job titles and filters from `config/titles.yaml`
-3. Crawl all companies and save matching jobs to `job_results/`
+1. Load the profile configuration from `config/profiles/<name>/`
+2. Load companies from the profile or fall back to `config/companies.yaml`
+3. Crawl all companies and save matching jobs to `job_results/<profile>/`
+
+## User Profiles
+
+Profiles allow multiple users to have different job search preferences. Each profile is a directory under `config/profiles/` containing a `titles.yaml` file.
+
+### Profile Structure
+
+```
+config/
+├── companies.yaml              # Global company list (shared by all profiles)
+└── profiles/
+    ├── default/
+    │   └── titles.yaml         # Default user preferences
+    ├── alice/
+    │   ├── titles.yaml         # Alice's job preferences
+    │   └── companies.yaml      # (Optional) Alice's custom company list
+    └── bob/
+        └── titles.yaml         # Bob's job preferences
+```
+
+### Creating a New Profile
+
+1. Create a new directory under `config/profiles/`:
+   ```bash
+   mkdir config/profiles/myprofile
+   ```
+
+2. Create a `titles.yaml` with your preferences:
+   ```yaml
+   titles:
+     - Data Scientist
+     - Machine Learning Engineer
+     - Research Scientist
+
+   locations:
+     - California
+     - New York
+     - Remote
+
+   exclude_levels:
+     - junior
+     - intern
+   ```
+
+3. (Optional) Create a custom `companies.yaml` if you want to search different companies
+
+4. Run your search:
+   ```bash
+   python run_search.py myprofile
+   # or
+   python search.py --profile myprofile
+   ```
+
+### Profile Output
+
+Results are stored separately for each profile:
+
+```
+job_results/
+├── default/
+│   └── 2026-01-25/
+│       ├── OpenAI/
+│       │   └── jobs.json
+│       └── ...
+├── alice/
+│   └── 2026-01-25/
+│       └── ...
+└── bob/
+    └── 2026-01-25/
+        └── ...
+```
 
 ## Configuration
 
@@ -62,9 +149,13 @@ companies:
     career_url: https://boards.greenhouse.io/anthropic
     ats_type: greenhouse
 
-  - name: Mistral AI
-    career_url: https://jobs.lever.co/mistral
-    ats_type: lever
+  - name: Amazon
+    career_url: https://www.amazon.jobs
+    ats_type: amazon
+
+  - name: Google
+    career_url: https://careers.google.com/jobs/results/
+    ats_type: google
 ```
 
 **Supported ATS types:**
@@ -72,9 +163,14 @@ companies:
 - `lever` - Lever.co job boards
 - `ashby` - Ashby HQ job boards
 - `workday` - Workday job sites
+- `amazon` - Amazon.jobs (custom API)
+- `google` - Google Careers (custom fetcher)
+- `tiktok` - TikTok/ByteDance careers (custom API)
+- `uber` - Uber careers (custom API)
+- `meta` - Meta careers (limited due to bot detection)
 - `custom` - Custom career pages (uses Playwright)
 
-### Job Titles & Filters (`config/titles.yaml`)
+### Job Titles & Filters (`config/profiles/<name>/titles.yaml`)
 
 Configure target job titles, locations, and exclusions:
 
@@ -104,37 +200,46 @@ exclude_levels:
 - `head` - Head of department roles
 - `vp` - VP-level positions
 - `junior` - Junior/Associate positions
+- `intern` - Internship positions
 
 ## CLI Usage
 
 For more control, use the CLI directly:
 
 ```bash
+# Using profiles (recommended)
+python search.py --profile default
+python search.py --profile alice --timeout 60
+
+# Using explicit config files
 python search.py \
   --companies config/companies.yaml \
-  --titles config/titles.yaml \
-  --output job_results \
-  --timeout 30
+  --titles config/profiles/default/titles.yaml \
+  --output job_results/custom
 ```
 
 **Options:**
-- `-c, --companies` - Path to companies YAML file (required)
-- `-t, --titles` - Path to job titles YAML file (required)
-- `-o, --output` - Output directory for results (default: `job_results`)
+- `-p, --profile` - Profile name (loads from `config/profiles/<name>/`)
+- `-c, --companies` - Path to companies YAML file (overrides profile)
+- `-t, --titles` - Path to job titles YAML file (overrides profile)
+- `-o, --output` - Output directory for results
 - `--timeout` - Request timeout in seconds (default: 30)
 
 ## Output
 
-Results are saved in a date-organized structure:
+Results are saved in a profile and date-organized structure:
 
 ```
 job_results/
-└── 2024-01-24/
-    ├── OpenAI/
-    │   └── jobs.json
-    ├── Anthropic/
-    │   └── jobs.json
-    └── ...
+└── default/
+    └── 2026-01-25/
+        ├── OpenAI/
+        │   ├── jobs.json
+        │   └── jobs.csv
+        ├── Anthropic/
+        │   ├── jobs.json
+        │   └── jobs.csv
+        └── ...
 ```
 
 Each `jobs.json` contains:
@@ -148,7 +253,7 @@ Each `jobs.json` contains:
     "location": "San Francisco, CA",
     "team": "Applied AI",
     "source": "ashby",
-    "discovered_at": "2024-01-24T10:30:00"
+    "discovered_at": "2026-01-25T10:30:00"
   }
 ]
 ```
@@ -180,27 +285,40 @@ python investigate_unverified.py
 ## Project Structure
 
 ```
-job-search-agent/
+Argus/
 ├── config/
-│   ├── companies.yaml      # Company list & career URLs
-│   └── titles.yaml         # Target job titles & filters
-├── job_search_agent/       # Main package
-│   ├── orchestrator.py     # Main orchestration logic
-│   ├── filter.py           # Job title/location filtering
-│   ├── store.py            # Job persistence
-│   ├── registry.py         # Company registry management
-│   ├── models.py           # Data models
-│   └── ats/                # ATS-specific adapters
+│   ├── companies.yaml          # Global company list
+│   └── profiles/               # User profiles
+│       ├── default/
+│       │   └── titles.yaml
+│       ├── Ming/
+│       │   └── titles.yaml
+│       └── Yaxi/
+│           └── titles.yaml
+├── Argus/                      # Main package
+│   ├── orchestrator.py         # Main orchestration logic
+│   ├── filter.py               # Job title/location filtering
+│   ├── store.py                # Job persistence
+│   ├── registry.py             # Company registry management
+│   ├── models.py               # Data models
+│   └── ats/                    # ATS-specific adapters
 │       ├── greenhouse.py
 │       ├── lever.py
 │       ├── ashby.py
 │       ├── workday.py
-│       ├── generic.py      # Playwright-based fallback
-│       └── detector.py     # ATS auto-detection
-├── run_search.py           # Quick runner script
-├── search.py               # CLI entry point
-├── fix_ats_config.py       # ATS config fixer tool
-└── requirements.txt        # Dependencies
+│       ├── amazon.py           # Amazon.jobs API
+│       ├── google.py           # Google Careers
+│       ├── tiktok.py           # TikTok/ByteDance
+│       ├── uber.py             # Uber Careers
+│       ├── generic.py          # Playwright-based fallback
+│       └── detector.py         # ATS auto-detection
+├── job_results/                # Output directory
+│   ├── default/                # Results for default profile
+│   └── <profile>/              # Results for other profiles
+├── run_search.py               # Quick runner script
+├── search.py                   # CLI entry point
+├── fix_ats_config.py           # ATS config fixer tool
+└── requirements.txt            # Dependencies
 ```
 
 ## Adding New Companies
@@ -222,6 +340,8 @@ The default configuration includes 50+ tech companies:
 - AI Labs: OpenAI, Anthropic, DeepMind, Mistral AI, Cohere, xAI, Perplexity AI
 - Big Tech: Google, Meta, Apple, Microsoft, Amazon
 - Finance: Stripe, Block, Coinbase, Plaid, Brex
+- Rideshare: Uber, Lyft
+- Social: TikTok, Pinterest, LinkedIn
 - And many more...
 
 ## Requirements
@@ -230,6 +350,21 @@ The default configuration includes 50+ tech companies:
 - httpx
 - playwright
 - pyyaml
+
+## Usage & Responsibility
+
+This project is intended for **personal job search and small-scale use**.
+
+Users are responsible for ensuring that their use of this tool complies with
+the terms of service of the websites they access and with applicable laws
+and regulations.
+
+This tool performs **read-only access** to publicly available job postings.
+It does **not** automate job applications, form submissions, or authentication
+flows.
+
+The author does not operate any centralized crawling service and does not
+collect or store user data.
 
 ## License
 

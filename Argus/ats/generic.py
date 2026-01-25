@@ -68,14 +68,11 @@ class GenericFetcher(CareerFetcher):
                 try:
                     page.goto(self.career_url, wait_until="networkidle", timeout=self.timeout * 1000)
 
-                    # Wait a bit for dynamic content
-                    page.wait_for_timeout(2000)
+                    # Wait for initial dynamic content to load
+                    page.wait_for_timeout(3000)
 
-                    # Get page content
-                    html = page.content()
-
-                    # Extract jobs from rendered HTML
-                    jobs = self._extract_jobs_from_html(html, self.career_url)
+                    # Scroll to load dynamically loaded content (infinite scroll)
+                    jobs = self._scroll_and_extract(page)
 
                 except Exception as e:
                     print(f"Playwright error for {self.company_name}: {e}")
@@ -88,6 +85,60 @@ class GenericFetcher(CareerFetcher):
             print(f"Error with Playwright for {self.company_name}: {e}")
 
         return jobs
+
+    def _scroll_and_extract(self, page) -> List[Job]:
+        """Scroll page to load all dynamic content and extract jobs."""
+        max_scrolls = 10
+        scroll_pause = 2000  # ms
+        prev_job_count = 0
+        no_change_count = 0
+
+        for i in range(max_scrolls):
+            # Try clicking "Load More" or "Show More" buttons
+            self._click_load_more(page)
+
+            # Scroll to bottom
+            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            page.wait_for_timeout(scroll_pause)
+
+            # Extract jobs from current content
+            html = page.content()
+            jobs = self._extract_jobs_from_html(html, self.career_url)
+
+            # Check if we found new jobs
+            if len(jobs) == prev_job_count:
+                no_change_count += 1
+                if no_change_count >= 2:
+                    # No new jobs after 2 scrolls, stop
+                    break
+            else:
+                no_change_count = 0
+                prev_job_count = len(jobs)
+
+        return jobs
+
+    def _click_load_more(self, page):
+        """Try to click common 'Load More' buttons."""
+        load_more_selectors = [
+            "button:has-text('Load More')",
+            "button:has-text('Show More')",
+            "button:has-text('View More')",
+            "button:has-text('See More')",
+            "a:has-text('Load More')",
+            "a:has-text('Show More')",
+            "[data-testid='load-more']",
+            ".load-more",
+            ".show-more",
+        ]
+
+        for selector in load_more_selectors:
+            try:
+                button = page.locator(selector).first
+                if button.is_visible(timeout=500):
+                    button.click()
+                    page.wait_for_timeout(1500)
+            except Exception:
+                pass
 
     def _extract_jobs_from_html(self, html: str, base_url: str) -> List[Job]:
         """Extract job listings from HTML content."""

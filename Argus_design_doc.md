@@ -1,11 +1,11 @@
-# Job Search Agent – Crawler-Based Design Doc (Updated)
+# Argus – Crawler-Based Design Doc (Updated)
 
 ## 1. Overview
-This document describes the updated design of a **shareable, crawler-based Job Search Agent** that supports **both LLM and non-LLM modes**. The system is designed so that users **without any LLM access** can still use core job discovery features, while users **with LLM access** can enable enhanced matching, normalization, and intelligence.
+This document describes the updated design of a **shareable, crawler-based Argus** that supports **both LLM and non-LLM modes**. The system is designed so that users **without any LLM access** can still use core job discovery features, while users **with LLM access** can enable enhanced matching, normalization, and intelligence.
 
 The agent can be safely shared with other users, providing a clear capability boundary depending on whether LLM credentials are configured.
 
-This document describes the updated design of a **crawler-based Job Search Agent**. The system automatically crawls career websites for a predefined list of companies, searches for user-specified job titles, and stores discovered job postings (metadata + links) into a structured folder. A **separate Job Application Agent** will later consume these stored jobs to handle applications.
+This document describes the updated design of a **crawler-based Argus**. The system automatically crawls career websites for a predefined list of companies, searches for user-specified job titles, and stores discovered job postings (metadata + links) into a structured folder. A **separate Job Application Agent** will later consume these stored jobs to handle applications.
 
 **Core principles**:
 - Crawler-first (headless, deterministic, schedulable)

@@ -15,6 +15,11 @@ from .ats import (
     AshbyFetcher,
     WorkdayFetcher,
     GenericFetcher,
+    UberFetcher,
+    AmazonFetcher,
+    MetaFetcher,
+    GoogleFetcher,
+    TikTokFetcher,
 )
 
 
@@ -126,6 +131,11 @@ class Orchestrator:
             "lever": LeverFetcher,
             "ashby": AshbyFetcher,
             "workday": WorkdayFetcher,
+            "uber": UberFetcher,
+            "amazon": AmazonFetcher,
+            "meta": MetaFetcher,
+            "google": GoogleFetcher,
+            "tiktok": TikTokFetcher,
         }
 
         fetcher_class = fetchers.get(ats_type, GenericFetcher)
