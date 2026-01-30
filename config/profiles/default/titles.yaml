@@ -2,26 +2,24 @@
 # The filter will match jobs containing these keywords
 
 titles:
-  - Machine Learning Engineer
-  - Research Scientist
-  - Applied Scientist
-  - AI Scientist
-  # xAI-specific titles
-  - Member of Technical Staff
-  - Exceptional Software Engineer
-  - Exceptional Engineer
-  - Hardcore Engineer
+  - Data Scientist
+  - Data Analytics Engineer
+  - Business Intelligence Engineer
+  - Data Analyst
 
 # Location requirements
 # Jobs must match at least one of these locations
 locations:
-  - California
-  - Seattle
-  - Remote
+  - Luxembourg
+  - Netherlands
+  - France
+  - Germany
+  - Poland
+  - Belgium
 
 # Levels to exclude from results
 # Available levels: staff, principal, lead, director, manager, head, vp, junior
 exclude_levels:
-  - staff
-  - principal
+  - junior
+  - intern
 
